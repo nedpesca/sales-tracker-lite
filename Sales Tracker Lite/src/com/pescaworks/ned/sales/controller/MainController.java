@@ -1,5 +1,6 @@
 package com.pescaworks.ned.sales.controller;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -8,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+import com.pescaworks.ned.sales.MainApp;
 import com.pescaworks.ned.sales.model.Product;
 import com.pescaworks.ned.sales.model.TableEntry;
 
@@ -15,12 +17,16 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
 
 public class MainController implements EventHandler<MouseEvent> {
 	@FXML
@@ -28,6 +34,12 @@ public class MainController implements EventHandler<MouseEvent> {
 
 	@FXML
 	private ListView<String> drinksList;
+	
+	@FXML
+	private ListView<String> salesList;
+	
+	@FXML
+	private ListView<String> expensesList;
 
 	@FXML
 	private TableView<TableEntry> table;
@@ -62,6 +74,8 @@ public class MainController implements EventHandler<MouseEvent> {
 		table.setItems(tableEntries);
 		foodList.setOnMouseClicked(this);
 		drinksList.setOnMouseClicked(this);
+		salesList.setOnMouseClicked(this);
+		expensesList.setOnMouseClicked(this);
 	}
 
 	public void populateList() {
@@ -74,7 +88,11 @@ public class MainController implements EventHandler<MouseEvent> {
 			// Setup DB connection
 			Class.forName("com.mysql.jdbc.Driver");
 
-			connect = DriverManager.getConnection("jdbc:mysql://localhost/tribu?" + "user=root&password=root");
+			connect = DriverManager.getConnection("jdbc:mysql://localhost:3307/tribu?" + "user=root&password=root");
+
+			// connect =
+			// DriverManager.getConnection("jdbc:mysql://localhost:3307/tribu?"
+			// + "user=cc&password=cc2015");
 
 			statement = connect.createStatement();
 
@@ -109,6 +127,61 @@ public class MainController implements EventHandler<MouseEvent> {
 				drinksList.getItems().add(display);
 			}
 		}
+		
+		String[] sales = {"OTHER"};
+		String[] expenses = {"ICE", "OTHER"};
+		
+		for (String sale: sales) {
+			salesList.getItems().add(sale);
+		}
+		
+		for (String expense: expenses) {
+			expensesList.getItems().add(expense);
+		}
+		
+	}
+
+
+	@Override
+	public void handle(MouseEvent event) {
+		if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+			if (event.getSource() == foodList || event.getSource() == drinksList ||
+					event.getSource() == salesList || event.getSource() == expensesList) {
+				String selected = ((ListView<String>) event.getSource()).getSelectionModel().getSelectedItem();
+				Product product = getProductFromString(selected);
+
+				FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("view/Add.fxml"));
+				try {
+					Stage stage = new Stage();
+					
+					GridPane layout = (GridPane) loader.load();
+					Scene scene = new Scene(layout);
+					
+					AddController controller = loader.<AddController>getController();
+					controller.setup(this, product, selected);
+					
+					stage.setScene(scene);
+					stage.show();
+
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	private Product getProductFromString(String string) {
+		Product product = null;
+		for (Product p : productList) {
+			String s = p.getSubcategory() + ": " + p.getItem();
+			s = s.toUpperCase();
+			if (s.equals(string)) {
+				product = p;
+				break;
+			}
+		}
+		return product;
 	}
 
 	public ListView<String> getFoodList() {
@@ -173,44 +246,6 @@ public class MainController implements EventHandler<MouseEvent> {
 
 	public void setTableEntries(ObservableList<TableEntry> tableEntries) {
 		this.tableEntries = tableEntries;
-	}
-
-	@Override
-	public void handle(MouseEvent event) {
-		if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
-			if (event.getSource() == foodList || event.getSource() == drinksList) {
-				String selected = ((ListView<String>) event.getSource()).getSelectionModel().getSelectedItem();
-				Product product = getProductFromString(selected);
-				TableEntry entry = new TableEntry();
-
-				if (product == null) {
-					entry.setItem(selected);
-				} else {
-					entry.setItem(product.getItem());
-					entry.setUnitPrice(product.getPrice());
-				}
-
-				tableEntries.add(entry);
-			}
-		}
-	}
-
-	private void updateTable(TableEntry entry) {
-
-	}
-
-	private Product getProductFromString(String string) {
-		Product product = null;
-		for (Product p : productList) {
-			String s = p.getSubcategory() + ": " + p.getItem();
-			s = s.toUpperCase();
-			if (s.equals(string)) {
-				product = p;
-				break;
-			}
-		}
-
-		return product;
 	}
 
 }
