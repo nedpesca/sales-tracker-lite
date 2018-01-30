@@ -36,7 +36,7 @@ public class AddController implements EventHandler<MouseEvent> {
 		SpinnerValueFactory<Integer> quantityValue = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10, 1);
 
 		quantitySpin.setValueFactory(quantityValue);
-		
+
 		// Set button event handler
 		addButton.setOnMouseClicked(this);
 
@@ -68,21 +68,21 @@ public class AddController implements EventHandler<MouseEvent> {
 	public void handle(MouseEvent event) {
 		Node source = (Node) event.getSource();
 		Stage stage = (Stage) source.getScene().getWindow();
-		
+
 		if (caller == null) {
 			stage.close();
 			return;
 		}
-		
+
 		String name = itemText.getText();
 		String price = priceText.getText();
 		int quantity = quantitySpin.getValue();
-		
+
 		int intPrice = 0;
 
 		itemText.setStyle(null);
 		priceText.setStyle(null);
-		
+
 		if (name.isEmpty()) {
 			itemText.setStyle("-fx-text-box-border: red");
 			event.consume();
@@ -108,15 +108,18 @@ public class AddController implements EventHandler<MouseEvent> {
 		ObservableList<TableEntry> table = caller.getTableEntries();
 		TableEntry entry = new TableEntry();
 
-
 		entry.setItem(name);
 		entry.setUnitPrice(intPrice);
 		entry.setQuantity(quantity);
-		entry.setTotalPrice(intPrice * quantity);
-	
-		table.add(entry);
 		
-		caller.setTableEntries(table);
+		int totalPrice = intPrice * quantity;
+		entry.setTotalPrice(totalPrice);
+
+		table.add(entry);
+
+		int totalSales = Integer.parseInt(caller.getTotalSalesText().getText());
+		totalSales += totalPrice;
+		caller.getTotalSalesText().setText("" + totalSales);
 		
 		stage.close();
 

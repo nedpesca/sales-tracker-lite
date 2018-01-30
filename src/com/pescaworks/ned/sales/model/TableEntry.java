@@ -30,5 +30,12 @@ public class TableEntry {
 		this.totalPrice = totalPrice;
 	}
 	
-	
+	@Override
+	public String toString() {
+		String string = "[TableEntry:Item:" + item +
+						";UnitPrice:" + unitPrice +
+						";Quantity:" + quantity +
+						";TotalPrice:" + totalPrice + "]";
+		return string;
+	}
 }

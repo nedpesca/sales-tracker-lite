@@ -24,7 +24,7 @@ public class MainApp extends Application {
 	public void start(Stage primaryStage) {
 		try {
 			// Load person overview.
-			FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("view/Main2.fxml"));
+			FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("view/Main.fxml"));
 
 			// Perform loader.laod to get controller
 			SplitPane rootLayout = (SplitPane) loader.load();
